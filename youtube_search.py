@@ -39,7 +39,7 @@ def youtube_search(q, max_results=50,order="relevance", token=None, location=Non
 # create a CSV output for video list    
   csvFile = open('video_result.csv','w')
   csvWriter = csv.writer(csvFile)
-  csvWriter.writerow(["title","videoId","viewCount","likeCount","dislikeCount","commentCount","favoriteCount","publishedAt","duration","categoryID"])
+  csvWriter.writerow(["title","videoId","viewCount","likeCount","dislikeCount","commentCount","favoriteCount","publishedAt","duration","categoryID","caption","license"])
 
 # Add each result to the appropriate list, and then display the lists of
 # matching videos, channels, and playlists.
@@ -57,10 +57,16 @@ def youtube_search(q, max_results=50,order="relevance", token=None, location=Non
           video_response = youtube.videos().list(id=videoId,part="snippet").execute()
           for video_result in video_response.get("items",[]):
             categoryId = video_result["snippet"]["categoryId"]
-          #print("\ncategoryId :\n",cat,'\n')
+
+          video_response = youtube.videos().list(id=videoId,part="status").execute()
+          for video_result in video_response.get("items",[]):
+            license_ = video_result["status"]["license"]
+
           video_response = youtube.videos().list(id=videoId,part="contentDetails").execute()
           for video_result in video_response.get("items",[]):
             duration = video_result["contentDetails"]["duration"]
+            caption = video_result["contentDetails"]["caption"]
+
           video_response = youtube.videos().list(id=videoId,part="statistics").execute()
           for video_result in video_response.get("items",[]):
               #print("\n\nhaha\n",video_result,'\n\n')
@@ -83,7 +89,7 @@ def youtube_search(q, max_results=50,order="relevance", token=None, location=Non
               else:
                 favoriteCount = video_result["statistics"]["favoriteCount"]
                 
-          csvWriter.writerow([title,videoId,viewCount,likeCount,dislikeCount,commentCount,favoriteCount,publishedAt,duration,categoryId])
+          csvWriter.writerow([title,videoId,viewCount,likeCount,dislikeCount,commentCount,favoriteCount,publishedAt,duration,categoryId,caption,license_])
 
   csvFile.close()
   
